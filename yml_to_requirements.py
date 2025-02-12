@@ -17,10 +17,12 @@ def generate_pip_requirements(env_data):
                     # If there is a 'pip' section, add the packages to pip_requirements
                     pip_requirements.extend(value)
         elif isinstance(dep, str):  # Normal package declaration
-            # Conda-specific entries like '_libgcc_mutex' are skipped
+            # Conda-specific entries like '_libgcc_mutex' and '_openmp_mutex' are skipped
             if '=' in dep:
                 dep = dep.split('=')[0]  # Keep only the package name
-            pip_requirements.append(dep)
+            # Skip Conda-specific packages that aren't compatible with pip
+            if dep not in ['_libgcc_mutex', '_openmp_mutex', 'conda', 'pip']:
+                pip_requirements.append(dep)
     
     return pip_requirements
 
