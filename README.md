@@ -61,3 +61,8 @@ conda env create --file environment.yml
 `main.py` is a module that run the entire process of data loading, cleaning, splitting, model building, training, testing and evaluating.  
 
 `utils.py` is a script that contains all the helper functions for data loading, cleaning, splitting, model building, training, testing, and evaluating.  
+
+## Additional Notes
+
+1. Clone this repo
+2. Run conda list --export > requirements.txt in the repo path to convert environment file to requirements.txt
