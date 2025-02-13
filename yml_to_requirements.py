@@ -21,7 +21,7 @@ def generate_pip_requirements(env_data):
             if '=' in dep:
                 dep = dep.split('=')[0]  # Keep only the package name
             # Skip Conda-specific packages that aren't compatible with pip
-            if dep not in ['_libgcc_mutex', '_openmp_mutex', 'conda', 'pip']:
+            if dep not in ['_libgcc_mutex', '_openmp_mutex', 'conda', 'pip', 'backports', 'backports.functools_lru_cache']:
                 pip_requirements.append(dep)
     
     return pip_requirements

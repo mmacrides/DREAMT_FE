@@ -280,7 +280,8 @@ def GPBoost_engine(
     # due to the much longer fitting time
     trials = Trials()
     gpb_best_hyperparams = fmin(
-        fn=objective, space=space, algo=tpe.suggest, max_evals=10, trials=trials
+        fn=objective, space=space, algo=tpe.suggest, max_evals=50  # Change this value to 50
+        , trials=trials
     )
     print("Best hyperparameters:", gpb_best_hyperparams)
 
