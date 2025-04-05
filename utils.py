@@ -7,7 +7,9 @@ import seaborn as sns
 from sklearn.metrics import accuracy_score, confusion_matrix, recall_score, precision_score, f1_score, auc, precision_recall_curve, roc_auc_score, cohen_kappa_score
 from sklearn.base import TransformerMixin
 
-from scipy.signal import gaussian, convolve, windows
+# from scipy.signal import gaussian, convolve, windows -- Guassian is now in .windows path
+from scipy.signal import convolve, windows
+from scipy.signal.windows import gaussian
 from scipy.ndimage import gaussian_filter1d
 
 import torch
