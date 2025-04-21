@@ -1,63 +1,148 @@
-# DREAMT: Dataset for Real-time sleep stage EstimAtion using Multisensor wearable Technology
+# DREAMT_FE Project: Setup & Workflow Guide
 
-## Directory Structure
+> **Purpose:**  
+> Step‑by‑step instructions for setting up, preprocessing, feature engineering, and running the DREAMT_FE pipeline locally.
 
-The main components of the project pipeline includes: 
-* Extracting data from the raw data
-* Perform preprocessing and feature enginering on the data
-* Training models for classification
+---
+
+## 📑 Table of Contents
+
+- [DREAMT\_FE Project: Setup \& Workflow Guide](#dreamt_fe-project-setup--workflow-guide)
+  - [📑 Table of Contents](#-table-of-contents)
+  - [Step 1: Environment Setup](#step1-environment-setup)
+  - [Step 2: Feature Engineering](#step2-feature-engineering)
+    - [Option A: Re‑run Preprocessing](#option-a-rerun-preprocessing)
+    - [Option B: Use Existing Outputs](#option-b-use-existing-outputs)
+  - [Step 3: Calculate Quality Score](#step3-calculate-quality-score)
+    - [Option A: Re‑compute Scores](#option-a-recompute-scores)
+    - [Option B: Use Existing Scores](#option-b-use-existing-scores)
+  - [Step 4: Run Main Pipeline](#step4-run-main-pipeline)
+  - [Optional: `main_cv.py`](#optional-main_cvpy)
+  - [Helper Modules Overview](#helper-modules-overview)
+    - [Datasets.py](#datasetspy)
+    - [Models.py](#modelspy)
+    - [Utils.py](#utilspy)
+
+---
+
+## Step 1: Environment Setup
+
+1. **Clone the Repository**  
+   ```bash
+   git clone https://github.com/mmacrides/DREAMT_FE.git
+   cd DREAMT_FE
+   ```
+
+2. **Create Conda Environment**  
+   The provided `environment_mac.yml` has Linux‑incompatible packages removed for M1/M2 Macs:
+   ```bash
+   conda env create --file environment_mac.yml
+   conda activate dreamt
+   ```
+
+3. **Skip Pre‑Aggregation**  
+   We’re starting from pre‑aggregated E4 files, so you can skip the “read_raw_e4.py” step.
+
+   **Background on `read_raw_e4.py`:**  
+   > Reads raw Empatica E4 signals (HR, TEMP, ACC, BVP, EDA, IBI), aligns them with sleep stages & reports (e.g. AHI), and outputs CSVs into  
+   > `dataset_sample/E4_aggregate/…`  
+   >  
+   > Since we already have those aggregated files, this step is **skipped**.
+
+---
+
+## Step 2: Feature Engineering
+
+### Option A: Re‑run Preprocessing
+
+1. **Wipe Old Outputs**  
+   ```bash
+   rm dataset_sample/E4_aggregate/*.csv
+   rm dataset_sample/features_df/*.csv
+   ```
+
+2. **Inject PhysioNet Data**  
+   - Unzip the PhysioNet download.  
+   - Copy each `SID_whole_df.csv` into `dataset_sample/E4_aggregate/`.
+
+3. **Run Feature Engineering**  
+   ```bash
+   python3 feature_engineering.py
+   ```
+   - **Output:**  
+     `dataset_sample/features_df/SID_domain_features_df.csv`
+
+---
+
+### Option B: Use Existing Outputs
+
+- **Skip** `feature_engineering.py`  
+- We already have:  
+  `dataset_sample/features_df/SID_domain_features_df.csv`
+
+---
+
+## Step 3: Calculate Quality Score
+
+### Option A: Re‑compute Scores
+
+1. **Remove Old Scores**  
+   ```bash
+   rm results/quality_scores_per_subject.csv
+   ```
+
+2. **Run Scoring Script**  
+   ```bash
+   python calculate_quality_score.py
+   ```
+   - **Output:**  
+     `results/quality_scores_per_subject.csv`
+
+---
+
+### Option B: Use Existing Scores
+
+- **Skip** `calculate_quality_score.py`  
+- We already have:  
+  `results/quality_scores_per_subject.csv`
+
+---
+
+## Step 4: Run Main Pipeline
 
 ```bash
-.
-├── dataset_sample
-    └── features_df
-        └── SID_domain_features.csv
-    └── E4_aggregate_subsample
-        └── subsampled_SID_whole_df.csv
-    └── participant_info.csv
-├── results
-│   └── quality_score_per_subject.csv
-├── read_raw_e4.py
-├── calculate_quality_score.py
-├── feature_engineering.py
-├── datasets.py
-├── models.py
-├── main.py
-└── utils.py
-
+python main.py
 ```
 
-## Setup
+> **What It Does:**  
+> Loads data → Cleans & splits → Builds, trains & tests model → Evaluates performance  
+>
+> (Identical to `experiments.ipynb`, but in script form.)
 
-1. Clone this repository.
-2. Create a Conda environment from `.yml` file.
+---
+
+## Optional: `main_cv.py`
+
+```bash
+python main_cv.py
 ```
-conda env create --file environment.yml
-```
 
-## Description
-`dataset_sample` is the folder containing a sample data folder for feature engineered data for every participant, a file for participant information, and subsampled raw signal data for each participant.  
+> Same end‑to‑end flow as `main.py`, **plus** cross‑validation.
 
-`features_df` is the folder contarining the files for feature engineered data.  
+---
 
-`sid_domain_features_df.csv` is the csv file containing features calculated from the raw Empatica E4 data recorded during data collection.  
+## Helper Modules Overview
 
-`participant_info.csv` is the csv file containing the basic information of the participant. 
+### Datasets.py  
+> **Role:** Loads & cleans feature‑engineered data, resamples, and splits into `train`/`val`/`test`.  
+> Used by: `main.py`, `main_cv.py`.
 
-`cpap_analysis.py` is a module that takes in the data and output the breathing information of each patient. The result will be outputed into a json file with patient number as file name.  
+### Models.py  
+> **Role:** Defines model architectures, trains/tests them, and returns metrics & confusion matrices.  
+> Used by: `main.py`, `main_cv.py`.
 
-`quality_score_per_subject.csv`: is a file summarizing the percentage of artifacts of each subject's data calculated from features dataframe `sid_domain_features_df.csv`.   
+### Utils.py  
+> **Role:** Shared helper functions for loading, cleaning, splitting, model building, training, testing, and evaluation.  
+> Used by: `Datasets.py`, `Models.py`, `main.py`, `main_cv.py`.  
 
-`read_raw_e4.py` is a module that read raw Empatica E4 data, sleeps stage label, and sleep report to generate a dataframe that aligns the Empatica E4 data with sleep stage and sleep performance, such as Apnea-Hypopnea Index, by time.  
-
-`read_raw_PSG.py` is a module that read raw polysomnography (PSG) data and extract the data during Empatica E4 recording.  
-
-`feature_engineering.py` is a module that read the processed data by `read_raw_e4.py` and perform feature engineering on the data. The result data is stored in `feature_df` in `data`. 
-
-`datasets.py` is a module that read the feature engineered data in `feature_df` and perform data loading, cleaning, and resampling. The processed data is split into train, test, and validation set.  
-
-`models.py` is a module that build, train, and test the model using the train, test, and validation set from `datasets.py`. It will return a result metrics and confusion matrix of the model performance.  
-
-`main.py` is a module that run the entire process of data loading, cleaning, splitting, model building, training, testing and evaluating.  
-
-`utils.py` is a script that contains all the helper functions for data loading, cleaning, splitting, model building, training, testing, and evaluating.  
+---
