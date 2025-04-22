@@ -62,8 +62,8 @@
    ```
 
 2. **Inject PhysioNet Data**  
-   - Unzip the PhysioNet download.  
-   - Copy each `SID_whole_df.csv` into `dataset_sample/E4_aggregate/`.
+   - Download the zipped file from https://physionet.org/content/dreamt/2.0.0/. Unzip the file.  
+   - Copy each `data_64Hz/SID_whole_df.csv` into `dataset_sample/E4_aggregate/`.
 
 3. **Run Feature Engineering**  
    ```bash
