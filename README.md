@@ -145,11 +145,9 @@ A script that contains all the helper functions for data loading, cleaning, spli
 
 | Module                       | Description                                                                         |
 |------------------------------|-------------------------------------------------------------------------------------|
-| **read_raw_e4.py**           | Converts raw Empatica E4 signal files into aligned CSVs with sleep stage labels and AHI metrics. Skipped in the workflow since we don't have access to pre-aggregated input.          |
-| **feature_engineering.py**   | Reads aligned physiological data from `E4_aggregate/`, computes engineered features, and outputs them into `features_df/`.
-                 |
-| **calculate_quality_score.py** | Analyzes engineered features to assign a quality score for each subject, stored in `results/`.
- |
+| **read_raw_e4.py**           | Converts raw Empatica E4 signal files into aligned CSVs with sleep stage labels and AHI metrics. Skipped in the workflow since we don't have access to pre-aggregated input. |
+| **feature_engineering.py**   | Reads aligned physiological data from `E4_aggregate/`, computes engineered features, and outputs them into `features_df/`. |
+| **calculate_quality_score.py** | Analyzes engineered features to assign a quality score for each subject, stored in `results/`. |
 | **main.py**                  | A module that runs the entire process of data loading, cleaning, splitting, model building, training, testing and evaluating.
             |
 | **main_cv.py**               | Adds cross-validation on top of `main.py`, useful for assessing model robustness and generalization.
