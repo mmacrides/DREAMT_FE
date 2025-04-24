@@ -109,32 +109,6 @@ Same flow as `main.py`, but with k-fold cross-validation instead of a fixed trai
 
 ## Modules Overview
 
-### read_raw_e4.py
-Converts raw Empatica E4 signal files into aligned CSVs with sleep stage labels and AHI metrics. Skipped in the workflow since we don't have access to pre-aggregated input.
-
-### feature_engineering.py
-Reads aligned physiological data from `E4_aggregate/`, computes engineered features, and outputs them into `features_df/`.
-
-### calculate_quality_score.py
-Analyzes engineered features to assign a quality score for each subject, stored in `results/`.
-
-### main.py
-A module that runs the entire process of data loading, cleaning, splitting, model building, training, testing and evaluating.
-
-### main_cv.py
-Adds cross-validation on top of `main.py`, useful for assessing model robustness and generalization.
-
-### Datasets.py
-A module that read the feature engineered data in feature_df and perform data loading, cleaning, and resampling. The processed data is split into train, test, and validation set.
-
-### Models.py
-A module that builds, trains, and tests the model using the train, test, and validation set from `datasets.py`. It will return a result metrics and confusion matrix of the model performance.
-
-### Utils.py
-A script that contains all the helper functions for data loading, cleaning, splitting, model building, training, testing, and evaluating.
-
-## Modules Overview
-
 | Module                       | Description                                                                         |
 |------------------------------|-------------------------------------------------------------------------------------|
 | **read_raw_e4.py**           | Converts raw Empatica E4 signal files into aligned CSVs with sleep stage labels and AHI metrics. Skipped in the workflow since we don't have access to pre-aggregated input. |
