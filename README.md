@@ -1,148 +1,142 @@
+
 # DREAMT_FE Project: Setup & Workflow Guide
 
-> **Purpose:**  
-> Step‑by‑step instructions for setting up, preprocessing, feature engineering, and running the DREAMT_FE pipeline locally.
-
----
+## Purpose:
+This guide provides detailed instructions and descriptions for setting up the DREAMT_FE pipeline, preprocessing physiological sleep data, engineering features, scoring data quality, and running the machine learning models—either with or without cross-validation.
 
 ## 📑 Table of Contents
+- [DREAMT_FE Project: Setup & Workflow Guide](#dreamt_fe-project-setup--workflow-guide)
+- [📑 Table of Contents](#-table-of-contents)
+- [Step 1: Environment Setup](#step-1-environment-setup)
+- [Step 2: Feature Engineering](#step-2-feature-engineering)
+  - [Option A: Re-run Preprocessing](#option-a-re-run-preprocessing)
+  - [Option B: Use Existing Outputs](#option-b-use-existing-outputs)
+- [Step 3: Calculate Quality Score](#step-3-calculate-quality-score)
+  - [Option A: Re-compute Scores](#option-a-re-compute-scores)
+  - [Option B: Use Existing Scores](#option-b-use-existing-scores)
+- [Step 4: Run Main Pipeline](#step-4-run-main-pipeline)
+- [Optional: main_cv.py](#optional-main_cvpy)
+- [Modules Overview](#modules-overview)
+  - [read_raw_e4.py](#read_raw_e4py)
+  - [feature_engineering.py](#feature_engineeringpy)
+  - [calculate_quality_score.py](#calculate_quality_scorepy)
+  - [main.py](#mainpy)
+  - [main_cv.py](#main_cvpy)
+  - [Datasets.py](#datasetspy)
+  - [Models.py](#modelspy)
+  - [Utils.py](#utilspy)
 
-- [DREAMT\_FE Project: Setup \& Workflow Guide](#dreamt_fe-project-setup--workflow-guide)
-  - [📑 Table of Contents](#-table-of-contents)
-  - [Step 1: Environment Setup](#step1-environment-setup)
-  - [Step 2: Feature Engineering](#step2-feature-engineering)
-    - [Option A: Re‑run Preprocessing](#option-a-rerun-preprocessing)
-    - [Option B: Use Existing Outputs](#option-b-use-existing-outputs)
-  - [Step 3: Calculate Quality Score](#step3-calculate-quality-score)
-    - [Option A: Re‑compute Scores](#option-a-recompute-scores)
-    - [Option B: Use Existing Scores](#option-b-use-existing-scores)
-  - [Step 4: Run Main Pipeline](#step4-run-main-pipeline)
-  - [Optional: `main_cv.py`](#optional-main_cvpy)
-  - [Helper Modules Overview](#helper-modules-overview)
-    - [Datasets.py](#datasetspy)
-    - [Models.py](#modelspy)
-    - [Utils.py](#utilspy)
+## Step 1: Environment Setup
 
----
+### Clone the Repository
+```bash
+git clone https://github.com/mmacrides/DREAMT_FE.git
+cd DREAMT_FE
+```
 
-## Step 1: Environment Setup
+### Create Conda Environment
+Uses `environment_mac.yml`, which is tailored for M1/M2 Macs:
+```bash
+conda env create --file environment_mac.yml
+conda activate dreamt
+```
 
-1. **Clone the Repository**  
-   ```bash
-   git clone https://github.com/mmacrides/DREAMT_FE.git
-   cd DREAMT_FE
-   ```
+### Skip read_raw_e4.py
+This step is not needed since we already have aggregated E4 data. 
+PhysioNet only provides the aggregated E4 data as well so it is not possible to reproduce this step. 
+`read_raw_e4.py` reads raw sensor data (HR, TEMP, ACC, BVP, EDA, IBI) and aligns them with sleep stages and clinical reports (like AHI). It outputs aligned CSVs to `dataset_sample/E4_aggregate/`.
 
-2. **Create Conda Environment**  
-   The provided `environment_mac.yml` has Linux‑incompatible packages removed for M1/M2 Macs:
-   ```bash
-   conda env create --file environment_mac.yml
-   conda activate dreamt
-   ```
+## Step 2: Feature Engineering
 
-3. **Skip Pre‑Aggregation**  
-   We’re starting from pre‑aggregated E4 files, so you can skip the “read_raw_e4.py” step.
+### Option A: Re-run Preprocessing
+Use this option if you're updating or reprocessing the E4 data.
 
-   **Background on `read_raw_e4.py`:**  
-   > Reads raw Empatica E4 signals (HR, TEMP, ACC, BVP, EDA, IBI), aligns them with sleep stages & reports (e.g. AHI), and outputs CSVs into  
-   > `dataset_sample/E4_aggregate/…`  
-   >  
-   > Since we already have those aggregated files, this step is **skipped**.
+#### Clear Old Outputs
+```bash
+rm dataset_sample/E4_aggregate/*.csv
+rm dataset_sample/features_df/*.csv
+```
 
----
+#### Prepare PhysioNet Input
+Download and unzip data from: https://physionet.org/content/dreamt/2.0.0/  
+Copy each `SID_whole_df.csv` from `data_64Hz/` into `dataset_sample/E4_aggregate/`
 
-## Step 2: Feature Engineering
+#### Run Feature Engineering
+```bash
+python3 feature_engineering.py
+```
+**Output:**  
+Generates `SID_domain_features_df.csv` in `dataset_sample/features_df/`  
+Extracts domain-specific features (e.g., signal statistics, frequency domain features) from the time-aligned E4 data.
 
-### Option A: Re‑run Preprocessing
+### Option B: Use Existing Outputs [preferred choice for faster reproducability]
+If you're not modifying the input data or feature engineering process:
 
-1. **Wipe Old Outputs**  
-   ```bash
-   rm dataset_sample/E4_aggregate/*.csv
-   rm dataset_sample/features_df/*.csv
-   ```
+- Skip `feature_engineering.py`
+- Use the pre-generated:
+  - `dataset_sample/features_df/SID_domain_features_df.csv`
 
-2. **Inject PhysioNet Data**  
-   - Download the zipped file from https://physionet.org/content/dreamt/2.0.0/. Unzip the file.  
-   - Copy each `data_64Hz/SID_whole_df.csv` into `dataset_sample/E4_aggregate/`.
+## Step 3: Calculate Quality Score
 
-3. **Run Feature Engineering**  
-   ```bash
-   python3 feature_engineering.py
-   ```
-   - **Output:**  
-     `dataset_sample/features_df/SID_domain_features_df.csv`
+### Option A: Re-compute Scores
+Use this if you’ve regenerated the features or changed how quality is computed.
 
----
+#### Remove Old Scores
+```bash
+rm results/quality_scores_per_subject.csv
+```
 
-### Option B: Use Existing Outputs
+#### Run the Quality Scoring Script
+```bash
+python calculate_quality_score.py
+```
+**Output:**  
+`results/quality_scores_per_subject.csv`  
+Computes a participant-level score based on data completeness or signal quality metrics.
 
-- **Skip** `feature_engineering.py`  
-- We already have:  
-  `dataset_sample/features_df/SID_domain_features_df.csv`
-
----
-
-## Step 3: Calculate Quality Score
-
-### Option A: Re‑compute Scores
-
-1. **Remove Old Scores**  
-   ```bash
-   rm results/quality_scores_per_subject.csv
-   ```
-
-2. **Run Scoring Script**  
-   ```bash
-   python calculate_quality_score.py
-   ```
-   - **Output:**  
-     `results/quality_scores_per_subject.csv`
-
----
-
-### Option B: Use Existing Scores
-
-- **Skip** `calculate_quality_score.py`  
-- We already have:  
+### Option B: Use Existing Scores if you have not altered the feature engineering phase [preferred choice for faster reproducability]
+- Skip `calculate_quality_score.py`
+- Use the pre-generated file in:  
   `results/quality_scores_per_subject.csv`
 
----
-
-## Step 4: Run Main Pipeline
+## Step 4: Run Main Pipeline
 
 ```bash
 python main.py
 ```
+**What it does:**  
+Loads features and quality scores → Splits into train/val/test → Trains a classification model → Evaluates on test data  
+Mirrors `experiments.ipynb` but runs as a clean pipeline script.
 
-> **What It Does:**  
-> Loads data → Cleans & splits → Builds, trains & tests model → Evaluates performance  
->
-> (Identical to `experiments.ipynb`, but in script form.)
-
----
-
-## Optional: `main_cv.py`
+## Optional: main_cv.py
 
 ```bash
 python main_cv.py
 ```
+Same flow as `main.py`, but with k-fold cross-validation instead of a fixed train/test split.
 
-> Same end‑to‑end flow as `main.py`, **plus** cross‑validation.
+## Modules Overview
 
----
+### read_raw_e4.py
+Converts raw Empatica E4 signal files into aligned CSVs with sleep stage labels and AHI metrics. Skipped in the workflow since we don't have access to pre-aggregated input.
 
-## Helper Modules Overview
+### feature_engineering.py
+Reads aligned physiological data from `E4_aggregate/`, computes engineered features, and outputs them into `features_df/`.
 
-### Datasets.py  
-> **Role:** Loads & cleans feature‑engineered data, resamples, and splits into `train`/`val`/`test`.  
-> Used by: `main.py`, `main_cv.py`.
+### calculate_quality_score.py
+Analyzes engineered features to assign a quality score for each subject, stored in `results/`.
 
-### Models.py  
-> **Role:** Defines model architectures, trains/tests them, and returns metrics & confusion matrices.  
-> Used by: `main.py`, `main_cv.py`.
+### main.py
+A module that runs the entire process of data loading, cleaning, splitting, model building, training, testing and evaluating.
 
-### Utils.py  
-> **Role:** Shared helper functions for loading, cleaning, splitting, model building, training, testing, and evaluation.  
-> Used by: `Datasets.py`, `Models.py`, `main.py`, `main_cv.py`.  
+### main_cv.py
+Adds cross-validation on top of `main.py`, useful for assessing model robustness and generalization.
 
----
+### Datasets.py
+A module that read the feature engineered data in feature_df and perform data loading, cleaning, and resampling. The processed data is split into train, test, and validation set.
+
+### Models.py
+A module that builds, trains, and tests the model using the train, test, and validation set from `datasets.py`. It will return a result metrics and confusion matrix of the model performance.
+
+### Utils.py
+A script that contains all the helper functions for data loading, cleaning, splitting, model building, training, testing, and evaluating.
