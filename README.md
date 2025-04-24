@@ -41,7 +41,7 @@ PhysioNet only provides the aggregated E4 data as well so it is not possible to 
 ## Step 2: Feature Engineering
 
 ### Option A: Re-run Preprocessing
-Use this option if you're updating or reprocessing the E4 data.
+Use this option if you're extending or reprocessing the E4 data.
 
 #### Clear Old Outputs
 ```bash
@@ -71,7 +71,7 @@ If you're not modifying the input data or feature engineering process:
 ## Step 3: Calculate Quality Score
 
 ### Option A: Re-compute Scores
-Use this if you’ve regenerated the features or changed how quality is computed.
+Use this if you’ve created an extension for the feature engineering file or changed how quality is computed.
 
 #### Remove Old Scores
 ```bash
