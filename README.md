@@ -145,7 +145,7 @@ A script that contains all the helper functions for data loading, cleaning, spli
 
 | Module                       | Description                                                                         |
 |------------------------------|-------------------------------------------------------------------------------------|
-| **read_raw_e4.py**           | Aligns raw E4 signals with sleep stages & reports—outputs aggregated CSVs.          |
+| **read_raw_e4.py**           | Converts raw Empatica E4 signal files into aligned CSVs with sleep stage labels and AHI metrics. Skipped in the workflow since we don't have access to pre-aggregated input.          |
 | **feature_engineering.py**   | Computes time & frequency domain features from aggregated E4 data.                  |
 | **calculate_quality_score.py** | Assigns quality scores per subject based on feature completeness & signal metrics. |
 | **main.py**                  | End-to-end pipeline: load, clean, split, model train/test, and evaluate.            |
