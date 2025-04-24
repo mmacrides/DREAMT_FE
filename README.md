@@ -140,3 +140,16 @@ A module that builds, trains, and tests the model using the train, test, and val
 
 ### Utils.py
 A script that contains all the helper functions for data loading, cleaning, splitting, model building, training, testing, and evaluating.
+
+## Modules Overview
+
+| Module                       | Description                                                                         |
+|------------------------------|-------------------------------------------------------------------------------------|
+| **read_raw_e4.py**           | Aligns raw E4 signals with sleep stages & reports—outputs aggregated CSVs.          |
+| **feature_engineering.py**   | Computes time & frequency domain features from aggregated E4 data.                  |
+| **calculate_quality_score.py** | Assigns quality scores per subject based on feature completeness & signal metrics. |
+| **main.py**                  | End-to-end pipeline: load, clean, split, model train/test, and evaluate.            |
+| **main_cv.py**               | Same pipeline with k‑fold cross-validation.                                          |
+| **Datasets.py**              | Loads feature data, cleans, resamples & splits into train/val/test sets.            |
+| **Models.py**                | Defines, trains, tests models; returns metrics & confusion matrices.                |
+| **Utils.py**                 | Shared helper functions for data I/O, processing, modeling, and evaluation.         |
