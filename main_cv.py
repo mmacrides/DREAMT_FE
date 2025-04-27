@@ -85,6 +85,41 @@ for fold, (trainval_idx, test_idx) in enumerate(kf.split(good_quality_sids)):
     )
     lgb_lstm_test_results_df = LSTM_eval(LSTM_model, dataloader_test, true_ls_test, 'LightGBM_LSTM')
 
+    ################# EXTENSIONS #################
+
+    ### EXTENSION 1: LSTM + Label Smoothing = 0.1
+    # create train data
+    dataloader_train = LSTM_dataloader(
+        prob_ls_train, len_train, true_ls_train, batch_size=32
+    )
+
+    # Run LSTM model
+    LSTM_model_label_smoothing = LSTM_engine_label_smoothing(dataloader_train, num_epoch=300, hidden_layer_size=32, learning_rate=0.001) # set your num_epoch
+
+    # test LSMT model
+    dataloader_test = LSTM_dataloader(
+        prob_ls_test, len_test, true_ls_test, batch_size=1
+    )
+    lgb_lstm_test_results_df = LSTM_eval(LSTM_model_label_smoothing, dataloader_test, true_ls_test, 'LightGBM_LSTM')
+    lgb_lstm_test_results_df
+
+    ### EXTENSION 2: LSTM + Focal Loss
+    # create train data
+    dataloader_train = LSTM_dataloader(
+        prob_ls_train, len_train, true_ls_train, batch_size=32
+    )
+
+    # Run LSTM model
+    LSTM_model_focal = LSTM_engine_focal(dataloader_train, num_epoch=300, hidden_layer_size=32, learning_rate=0.001) # set your num_epoch
+
+    # test LSMT model
+    dataloader_test = LSTM_dataloader(
+        prob_ls_test, len_test, true_ls_test, batch_size=1
+    )
+    lgb_lstm_test_results_df = LSTM_eval(LSTM_model_focal, dataloader_test, true_ls_test, 'LightGBM_LSTM')
+    lgb_lstm_test_results_df
+
+    ###############################################
 
     # Run GPBoost model
     final_gpb_model = GPBoost_engine(X_train_resampled, group_train_resampled, y_train_resampled, X_val, y_val, group_val)

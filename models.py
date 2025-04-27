@@ -520,3 +520,171 @@ def LSTM_eval(lstm_model, dataloader_test, list_true_stages_test, test_name):
     plot_cm(array_predict, list_true_stages_test, test_name)
 
     return lstm_test_results_df
+
+########################### -> EXTENSIONS <- ############################
+
+# EXTENSION 1: Label Smoothing for LSTM Post Processing
+
+def LSTM_engine_label_smoothing(dataloader_train, num_epoch, hidden_layer_size=32, learning_rate = 0.001):
+    """
+    Train a LSTM model using a DataLoader.
+    
+    Parameters
+    ----------
+    dataloader_train : DataLoader
+        DataLoader for the training data.
+    num_epoch : int
+        Number of epochs to train the model.
+
+    Returns
+    -------
+    model : BiLSTMPModel
+        Trained LSTM model.
+    """
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print(f"Training on {device}")
+
+    input_size = 4  # Number of features
+    output_size = 2
+
+    # dropout must be 0 if using only one layer of LSTM
+    model = BiLSTMPModel(input_size, hidden_layer_size, output_size).to(device)
+    loss_function = nn.CrossEntropyLoss(label_smoothing=0.1)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-5)
+    # Training loop
+    epochs = num_epoch
+
+    for epoch in range(epochs):
+        total_loss = 0
+        total_accuracy = 0
+        model.train()  # Set the model to training mode
+
+        for i, batch in enumerate(dataloader_train):
+            sample = batch["sample"].to(device)
+            length = batch["length"]
+            label = batch["label"].to(device)
+
+            if sample.shape[1] == 0:
+                print("Empty batch detected, skipping...")
+                continue
+
+            optimizer.zero_grad()
+            y_pred = model(sample, length)
+
+            # Reshape y_pred and label for CrossEntropyLoss
+            # CrossEntropyLoss expects y_pred of shape [N, C], label of shape [N]
+            y_pred = y_pred.view(-1, 2)  # Flatten output for CrossEntropyLoss
+            label = label.view(-1)  # Flatten label tensor
+
+            loss = loss_function(y_pred, label)
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss.item()
+            total_accuracy += calculate_accuracy(y_pred, label).item()
+
+        avg_loss = total_loss / len(dataloader_train)
+        avg_accuracy = total_accuracy / len(dataloader_train)
+
+        # Optionally, you can calculate loss and accuracy on a validation set he
+        # re
+        if (epoch + 1) % 5 == 0:
+            print(f"Epoch {epoch+1}/{epochs} - Loss: {avg_loss:.4f}, Accuracy: {avg_accuracy:.4f}")
+
+    return model
+
+
+
+# EXTENSION 2: Focal Loss for LSTM Post Processing
+
+class FocalLoss(nn.Module):
+    def __init__(self, alpha=0.25, gamma=2.0, reduction='mean'):
+        super(FocalLoss, self).__init__()
+        self.alpha = alpha  # balancing factor for the class
+        self.gamma = gamma  # focusing parameter
+        self.reduction = reduction
+
+    def forward(self, inputs, targets):
+        # Apply softmax to logits (if not already probabilities)
+        p_t = F.softmax(inputs, dim=-1)
+        p_t = p_t.gather(1, targets.view(-1, 1))  # Probability of the true class
+        
+        # Calculate the focal loss
+        loss = -self.alpha * (1 - p_t) ** self.gamma * torch.log(p_t)
+        
+        # Handle reduction mode (mean, sum, or none)
+        if self.reduction == 'mean':
+            return loss.mean()
+        elif self.reduction == 'sum':
+            return loss.sum()
+        else:
+            return loss
+
+def LSTM_engine_focal(dataloader_train, num_epoch, hidden_layer_size=32, learning_rate=0.001):
+    """
+    Train a LSTM model using a DataLoader with Focal Loss.
+    
+    Parameters
+    ----------
+    dataloader_train : DataLoader
+        DataLoader for the training data.
+    num_epoch : int
+        Number of epochs to train the model.
+
+    Returns
+    -------
+    model : BiLSTMPModel
+        Trained LSTM model.
+    """
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print(f"Training on {device}")
+
+    input_size = 4  # Number of features
+    output_size = 2
+
+    # dropout must be 0 if using only one layer of LSTM
+    model = BiLSTMPModel(input_size, hidden_layer_size, output_size).to(device)
+    
+    # Use Focal Loss
+    loss_function = FocalLoss(alpha=0.25, gamma=2.0, reduction='mean')  
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-5)
+    
+    # Training loop
+    epochs = num_epoch
+
+    for epoch in range(epochs):
+        total_loss = 0
+        total_accuracy = 0
+        model.train()  # Set the model to training mode
+
+        for i, batch in enumerate(dataloader_train):
+            sample = batch["sample"].to(device)
+            length = batch["length"]
+            label = batch["label"].to(device)
+
+            if sample.shape[1] == 0:
+                print("Empty batch detected, skipping...")
+                continue
+
+            optimizer.zero_grad()
+            y_pred = model(sample, length)
+
+            # Reshape y_pred and label for FocalLoss
+            y_pred = y_pred.view(-1, 2)  # Flatten output for FocalLoss
+            label = label.view(-1)  # Flatten label tensor
+
+            loss = loss_function(y_pred, label)
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss.item()
+            total_accuracy += calculate_accuracy(y_pred, label).item()
+
+        avg_loss = total_loss / len(dataloader_train)
+        avg_accuracy = total_accuracy / len(dataloader_train)
+
+        # Optionally, you can calculate loss and accuracy on a validation set here
+        if (epoch + 1) % 5 == 0:
+            print(f"Epoch {epoch+1}/{epochs} - Loss: {avg_loss:.4f}, Accuracy: {avg_accuracy:.4f}")
+
+    return model
