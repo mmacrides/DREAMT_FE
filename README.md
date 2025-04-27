@@ -105,7 +105,7 @@ Mirrors `experiments.ipynb` but runs as a clean pipeline script.
 ```bash
 python main_cv.py
 ```
-Same flow as `main.py`, but with k-fold cross-validation instead of a fixed train/test split.
+Same flow as `main.py`, but with k-fold cross-validation instead of a fixed train/test split. We did NOT use this file when reproducing our results and instead used `main.py`.
 
 ## Modules Overview
 
