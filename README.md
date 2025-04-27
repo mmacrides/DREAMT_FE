@@ -27,9 +27,9 @@ cd DREAMT_FE
 ```
 
 ### Create Conda Environment
-Uses `environment_mac.yml`, which is tailored for M1/M2 Macs:
+Uses `environment_final.yml`, which is tailored for M1/M2 Macs:
 ```bash
-conda env create --file environment_mac.yml
+conda env create --file environment_final.yml
 conda activate dreamt
 ```
 
