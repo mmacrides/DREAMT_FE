@@ -132,6 +132,8 @@ Same flow as `main.py`, but with k-fold cross-validation instead of a fixed trai
 | **calculate_quality_score.py** | Analyzes engineered features to assign a quality score for each subject, stored in `results/`. |
 | **main.py**                  | A module that runs the entire process of data loading, cleaning, splitting, model building, training, testing and evaluating. |
 | **main_cv.py**               | Adds cross-validation on top of `main.py`, useful for assessing model robustness and generalization. |
-| **Datasets.py**              | A module that read the feature engineered data in feature_df and perform data loading, cleaning, and resampling. The processed data is split into train, test, and validation set. |
-| **Models.py**                | A module that builds, trains, and tests the model using the train, test, and validation set from `datasets.py`. It will return a result metrics and confusion matrix of the model performance. |
-| **Utils.py**                 | A script that contains all the helper functions for data loading, cleaning, splitting, model building, training, testing, and evaluating. |
+| **datasets.py**              | A module that read the feature engineered data in feature_df and perform data loading, cleaning, and resampling. The processed data is split into train, test, and validation set. |
+| **models.py**                | A module that builds, trains, and tests the model using the train, test, and validation set from `datasets.py`. It will return a result metrics and confusion matrix of the model performance. |
+| **utils.py**                 | A script that contains all the helper functions for data loading, cleaning, splitting, model building, training, testing, and evaluating. |
+| **experiments.ipynb**        | A jupyter notebook file used to run model experiments. This file exactly mirrors `main.py`. |
+| **pyhealth_experiments.ipynb** | A jupyter notebook file used to test the pyhealth contributions related to this research repository. |
