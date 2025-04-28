@@ -16,6 +16,7 @@ This guide provides detailed instructions and descriptions for setting up the DR
   - [Option B: Use Existing Scores](#option-b-use-existing-scores)
 - [Step 4: Run Main Pipeline](#step-4-run-main-pipeline)
 - [Optional: main_cv.py](#optional-main_cvpy)
+- [CSV File Structure](#csv-file-srtucture)
 - [Modules Overview](#modules-overview)
 
 ## Step 1: Environment Setup
@@ -106,6 +107,21 @@ Mirrors `experiments.ipynb` but runs as a clean pipeline script.
 python main_cv.py
 ```
 Same flow as `main.py`, but with k-fold cross-validation instead of a fixed train/test split. We did NOT use this file when reproducing our results and instead used `main.py`.
+
+## CSV File Structure
+
+```bash
+.
+├── dataset_sample
+    └── features_df
+        └── SID_domain_features.csv
+    └── E4_aggregate_subsample
+        └── subsampled_SID_whole_df.csv
+    └── participant_info.csv
+├── results
+│   └── quality_score_per_subject.csv
+
+```
 
 ## Modules Overview
 
