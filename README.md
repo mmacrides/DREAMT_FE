@@ -16,7 +16,7 @@ This guide provides detailed instructions and descriptions for setting up the DR
   - [Option B: Use Existing Scores](#option-b-use-existing-scores)
 - [Step 4: Run Main Pipeline](#step-4-run-main-pipeline)
 - [Optional: main_cv.py](#optional-main_cvpy)
-- [CSV File Structure](#csv-file-srtucture)
+- [CSV File Structure](#csv-file-structure)
 - [Modules Overview](#modules-overview)
 
 ## Step 1: Environment Setup
@@ -119,7 +119,7 @@ Same flow as `main.py`, but with k-fold cross-validation instead of a fixed trai
         └── subsampled_SID_whole_df.csv
     └── participant_info.csv
 ├── results
-│   └── quality_score_per_subject.csv
+    └── quality_score_per_subject.csv
 
 ```
 
